@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang = "en">
+	<head>
+  	<title>Series Generator</title>
+  </head>
+
+
+	<h2 id = "head">
+		Determine the Convergence or Divergence of the following series:
+	</h2>
+
+	<body>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-MML-AM_CHTML">
+
+
+			function newProblem(){
+				NtrigFunctions = new Array("\\sin n","\\cos n","\\arctan n")
+				nPowers = new Array("n^2","n","\\sqrt{n}","1")
+				specialN = new Array("1","n^n","1")
+			  bigNPowers = new Array("n^2","n^4","n^5","n")
+
+				XtrigFunctions = new Array("sin(x)","cos(x)","arctan(x)")
+				xPowers = new Array("x^2","x^1","x^(1/2)","1")
+				specialX = new Array("1","x^x","1")
+				bigXPowers = new Array("x^2","x^4","x^5","x")
+
+				i = Math.floor(Math.random()*3)
+				j = Math.floor(Math.random()*4)
+				k = Math.floor(Math.random()*3)
+				l = Math.floor(Math.random()*4)
+
+				BottomNPowerTerms = bigNPowers[l]
+				BottomXPowerTerms = bigXPowers[l]
+
+				TopNPowerTerms = ""
+				TopXPowerTerms = ""
+				chance3 = [1,1,1,1,2,2,3,1]
+				numTerms = chance3[Math.floor(Math.random()*7)]
+				for(var index = 0; index < numTerms; ++index){
+					j = Math.floor(Math.random()*4)
+					if(nPowers[j] != "used"){
+						TopNPowerTerms += nPowers[j]
+						TopXPowerTerms += xPowers[j]
+						nPowers[j] = "used"
+					}
+					else{
+						--index
+						continue
+					}
+					if(index != numTerms-1){
+						TopNPowerTerms += "+"
+						TopXPowerTerms += "+"
+					}
+				}
+
+				NBottomSpecialPower = ""
+				XBottomSpecialPower = ""
+				chance1 = Math.floor(Math.random()*3)
+				if(chance1 == 1){
+					NBottomSpecialPower = "+" + specialN[k]
+					XBottomSpecialPower = "+" + specialX[k]
+				}
+
+				NTopSpecialPower = ""
+				XTopSpecialPower = ""
+				chance3 = Math.floor(Math.random()*3)
+				if(chance3 == 1){
+					NTopSpecialPower = specialN[k] + "+"
+					XTopSpecialPower = specialX[k] + "+"
+				}
+
+				NTrigTerm = ""
+				XTrigTerm = ""
+				chance2 = Math.floor(Math.random()*3)
+				if(chance2 == 1){
+					NTrigTerm = "+" + NtrigFunctions[i]
+					XTrigTerm = "+" + XtrigFunctions[i]
+				}
+
+				AddOne = ""
+				chance4 = Math.floor(Math.random()*2)
+				if(chance4 == 1){
+					AddOne = "+ 1"
+				}
+
+				LatexProblem = ("\\[\\displaystyle\\sum_{n=1}^{\\infty}\\dfrac{"
+			   + TopNPowerTerms + NTrigTerm + "}{"
+				 + BottomNPowerTerms + AddOne
+				 + "}\\]")
+
+				 SageProblem = "("  + TopXPowerTerms + XTrigTerm + ")/("
+				 + BottomXPowerTerms + AddOne + ")"
+
+				 Problems = new Array(LatexProblem,SageProblem)
+				 return Problems
+			 }
+			 Answers = newProblem()
+			 text.innerHTML += Answers[0]
+
+			function nthTermTest(){
+				sageCode = "def f(x):\n    return " + Answers[1] +
+				"\ndef limit(x):"+
+			  "\n    result = '\\infty'"+
+				"\n    number = 1\n    index = 1\n"+
+				"    while number < 10:\n" +
+				"        if abs(x(index)-x(index/10)) < .1:\n"+
+				"            result = str((int(abs(numerical_approx(x(index),1)))))\n            break\n"+
+    		"        number += 1\n        index *= 10" +
+				"\n    return result"+
+				"\nlimitValue = limit(f)"+
+				"\nLimitSol = 'The limit'"+
+				"\nLimitSol += '\\[\\displaystyle\\lim_{n\\Rightarrow\\infty}'"+
+				"\nLimitSol += '" + Answers[0].substring(34,Answers[0].length-2) +
+				"'\nLimitSol += '='"+
+				"\nLimitSol += limitValue"+
+				"\nLimitSol += '\\]'"+
+				"\nif limitValue != '0':"+
+				"\n    LimitSol += 'Therefore the series is Divergent.'"+
+				"\nelse:"+
+				"\n    LimitSol += 'Therefore the nth Term test is Inconclusive.'"+
+				"\nprint(LimitSol)"
+				return sageCode
+			}
+
+			function IntegralTest(){
+				sageCode =
+				"\ng = " + Answers[1] +
+				"\ndef intTest(funct):"+
+				"\n    number1 = 1\n    index1 = 1\n"+
+				"    while number1 < 5:\n" +
+				// Determines if function is strictly decreasing
+				"        if (f(index1*10) > f(index1)):\n"+
+				"            return 'Inconclusive'\n" +
+				"        number1 += 1\n        index1 *= 10" +
+				"\n    try:\n"+
+				"        n = funct.integrate(x,1,infinity)\n"+
+				"        return n,'Convergent'"+
+				"\n    except:\n"+
+				"        return '\\infty','Divergent'\n" +
+				"\nIntTestResult = intTest(g)"+
+				"\nIntTestSol = 'The Integral'"+
+				"\nIntTestSol += '\\[\\int_1^\\infty'"+
+				"\nIntTestSol +='"+ Answers[0].substring(34,Answers[0].length-2) +
+				"'\nIntTestSol += '='"+
+				"\nIntTestSol += str(IntTestResult[0])"+
+				"\nIntTestSol += '\\]'"+
+				"\nif IntTestResult[0] == '\\infty': "+
+				"\n    IntTestSol += 'Since the integral is infinte the series is Divergent.'"+
+				"\nelse:"+
+				"\n    IntTestSol += 'Since the intregral is finite the series is Convergent.'"+
+				"\nprint(IntTestSol)"
+
+				return sageCode
+			}
+
+			function SimpleCompTest(){
+				sageCode =
+				"\ndef CompSeries():" +
+				"\n    UString = u'" + Answers[1] + "'"+
+				"\n    TopPower = [0]" +
+				"\n    BottomPower = [0]" +
+				"\n    Top = True" +
+				"\n    for index in range(len(UString)):" +
+				"\n        if UString[index] == ')' and index != len(UString)-1 and  UString[index+1] == '/':" +
+				"\n            Top = False" +
+    		"\n        if UString[index].isnumeric() and UString[index-1] == '^':" +
+				"\n            if Top:" +
+        "\n                TopPower.append(int(UString[index]))" +
+				"\n            if not Top:" +
+				"\n                BottomPower.append(int(UString[index]))" +
+				"\n        if UString[index].isnumeric() and UString[index+1] == '/':" +
+				"\n            if Top:" +
+				"\n                TopPower.append(1/2)" +
+				"\n            if not Top:" +
+				"\n                BottomPower.append(1/2)" +
+				"\n    CompPower = max(TopPower)-max(BottomPower)" +
+				"\n    if CompPower < 0:" +
+				"\n        LatexCompSer = '\\[\\displaystyle\\sum_{n=1}^{\\infty}\\dfrac{1}{n^{'" + "+ str(abs(CompPower)) + " + "'}}\\]'"+
+				"\n        InverseLatexCompSer = '\\dfrac{n^{'" + "+ str(abs(CompPower)) + " + "'}}{1}'"+
+				"\n    else:" +
+				"\n        LatexCompSer = 'Inconclusive '"+
+				"\n        InverseLatexCompSer = 'Inconclusive' "+
+				"\n    SageCompSer = (x ^ max(TopPower))/(x ^ max(BottomPower))"+
+				"\n    InverseSageCompSer = (x ^ max(BottomPower))/(x ^ max(TopPower))"+
+				"\n    return LatexCompSer,SageCompSer, InverseLatexCompSer,InverseSageCompSer"+
+				"\nLatexCompSer = CompSeries()[0]"+
+				"\nSageCompSer = CompSeries()[1]"+
+				"\nInverseLatex = CompSeries()[2]"+
+				"\nInverseSageCompSer = CompSeries()[3]"+
+				"\nLessThan = True"+
+				"\npowerIndex = 1"+
+				"\nfor i in range(10):"+
+				"\n    if SageCompSer == 1:"+
+				"\n        break"+
+				"\n    powerIndex *= 10"+
+				"\n    if SageCompSer(powerIndex) > g(powerIndex):"+
+				"\n        LessThan = False"+
+				"\nCompSol = LatexCompSer"+
+				"\nrelation = ' is greater than'" +
+				"\nif LessThan:"+
+				"\n    relation = 'is less than'"+
+				"\nCompSol += relation"+
+				"\nCompSol += '" + Answers[0] +
+				"'\nCompSol += 'and is '" +
+				"\nCompresult = intTest(SageCompSer)[1]"+
+				"\nCompSol += Compresult"+
+				"\nresult = 'Inconclusive'"+
+				"\nif LessThan and Compresult == 'Divergent':"+
+				"\n    result = 'Divergent'" +
+				"\nif not LessThan and Compresult == 'Convergent':"+
+				"\n    result = 'Convergent'"+
+				"\nCompSol += ', Therefore the test result is '"+
+				'\nCompSol += result'+
+				"\nprint(CompSol)"
+
+				return sageCode
+			}
+
+			function LimitCompTest(){
+				sageCode =
+				"\nLimitCompSol = LatexCompSer" +
+				"\nLimitCompSol += 'The Limit evaluates to'" +
+				"\nLimitCompSol += '\\[\\displaystyle\\lim_{n\\Rightarrow\\infty}'" +
+				"\nLimitCompSol += '" + Answers[0].substring(34,Answers[0].length-2) +
+				"'\nLimitCompSol += '\\cdot'"+
+				"\nLimitCompSol += InverseLatex"+
+				"\nLimitCompSol += '='"+
+				"\ndef LimitProduct(x):" +
+				"\n    temp = 1"+
+				"\n    if InverseSageCompSer != 1:"+
+				"\n        temp = InverseSageCompSer(x)"+
+				"\n    return f(x) * temp " +
+				"\nLimitProduct = limit(LimitProduct)"+
+				"\nLimitCompSol += LimitProduct"+
+				"\nLimitCompSol += '\\]'"+
+				"\nLimitCompSol += 'Since the comparison limit is '"+
+				"\nLimitCompSol += Compresult"+
+				"\nLimitCompSol += ', the series is '"+
+				"\nLimitCompResult = 'Inconclusive'"+
+				"\nif LimitProduct != '\\infty':"+
+				"\n    LimitCompResult = Compresult"+
+				"\nLimitCompSol += LimitCompResult"+
+				"\nprint(LimitCompSol)"
+
+				return sageCode
+			}
+
+			function RatioTest(){
+				sageCode =
+				"\nRatioSol = 'The Limit evaluates to'"+
+				"\nnPlus1 = '" + Answers[0].substring(34,Answers[0].length-2) + "'" +
+				"\nnPlus1 = nPlus1.replace('sin','temp')"+
+				"\nnPlus1 = nPlus1.replace('tan','ta')"+
+				"\nnPlus1 = nPlus1.replace('n','(n+1)')"+
+				"\nnPlus1 = nPlus1.replace('temp','sin')"+
+				"\nnPlus1 = nPlus1.replace('ta','tan')"+
+				"\nRatioSol += '\\[\\displaystyle\\lim_{n\\Rightarrow\\infty}\\genfrac{}{}{2}{0}{'" +
+				"\nRatioSol += nPlus1" +
+				"\nRatioSol += '}{'" +
+				"\nRatioSol += '" + Answers[0].substring(34,Answers[0].length-2) + "'" +
+				"\nRatioSol += '}='"+
+				"\ndef RatioTest(x):" +
+				"\n    return f(x+1)/f(x)"+
+				"\nRatioResult = limit(RatioTest)"+
+				"\nRatioSol += RatioResult"+
+				"\nRatioSol += '\\]'"+
+				"\nRatioSol += 'Therefore the test is '" +
+				"\nRatioTestResult = 'Inconclusive'" +
+				"\nif RatioResult == '\\infty':"+
+				"\n    RatioTestResult = 'Divergent'"+
+				"\nelif int(RatioResult) < 1:"+
+				"\n    RatioTestResult = 'Convergent'"+
+				"\nelif int(RatioResult) > 1:"+
+				"\n    RatioTestResult = 'Divergent'"+
+				"\nRatioSol += RatioTestResult"+
+				"\nprint(RatioSol)"
+
+				return sageCode
+			}
+
+			function RootTest(){
+				sageCode =
+				"\nRootSol = 'The Limit evaluates to'" +
+				"\nRootSol += '\\[\\displaystyle\\lim_{n\\Rightarrow\\infty}\\sqrt[n]{'" +
+				"\nRootSol += '" + Answers[0].substring(34,Answers[0].length-2) + "'" +
+				"\nRootSol += '}='"+
+				"\ndef RootTest(x):" +
+				"\n    return f(x)^(1/x)"+
+				"\nRootResult = limit(RootTest)"+
+				"\nRootSol += RootResult" +
+				"\nRootSol += '\\]'"+
+				"\nRootSol += 'Therefore the test result is '" +
+				"\nRootTestResult = 'Inconclusive'" +
+				"\nif RootResult == '\\infty':"+
+				"\n    RootTestResult = 'Divergent'"+
+				"\nelif int(RootResult) < 1:"+
+				"\n    RootTestResult = 'Convergent'"+
+				"\nelif int(RootResult) > 1:"+
+				"\n    RootTestResult = 'Divergent'"+
+				"\nRootSol += RootTestResult"+
+				"\nprint(RootSol)"
+
+				return sageCode
+			}
+
+			function AllTests(){
+				sageCode = nthTermTest() + IntegralTest() + SimpleCompTest() + LimitCompTest()	+ RatioTest() + RootTest()
+				//window.alert(IntegralTest())
+				return sageCode
+			}
+
+			var answer = ""
+			var xhr = new XMLHttpRequest();
+
+			xhr.open( 'POST', 'https://sagecell.sagemath.org/service', false );
+			xhr.onload = function(){
+
+			var data = JSON.parse(xhr.response);
+		  answer = data.stdout;
+			var answer_array = answer.split('\n')
+
+			nTermtestResult.innerHTML = answer_array[0]
+			IntergraltestResult.innerHTML = answer_array[1]
+			compTestresult.innerHTML += answer_array[2]
+			limcompTestresult.innerHTML += answer_array[3]
+			ratioTestresult.innerHTML += answer_array[4]
+			rootTestresult.innerHTML += answer_array[5]
+
+		  }
+
+			xhr.setRequestHeader( 'content-type','application/x-www-form-urlencoded');
+			xhr.send('code=' + encodeURIComponent(AllTests()));
+
+		</script>
+		<p id = text>
+		</p>
+
+		<div>
+			<table style="width:100%" border="1px solid black">
+				<tr>
+					<th>Test</th>
+					<th>Result</th>
+				</tr>
+				<tr>
+					<td>nth Term Test</td>
+					<td id = nTermtestResult></td>
+				</tr>
+				<tr>
+					<td>Integral Test</td>
+					<td id = IntergraltestResult></td>
+				</tr>
+				<tr>
+					<td>Simple Comparison Test</td>
+					<td id = compTestresult>Compared To: </td>
+				</tr>
+				<tr>
+					<td>Limit Comparison Test</td>
+					<td id = limcompTestresult>Compared To: </td>
+				</tr>
+				<tr>
+					<td>Ratio Test</td>
+					<td id = ratioTestresult></td>
+				</tr>
+				<tr>
+					<td>Root Test</td>
+					<td id = rootTestresult></td>
+				</tr>
+		</div>
+
+	</body>
+
+
+</html>
